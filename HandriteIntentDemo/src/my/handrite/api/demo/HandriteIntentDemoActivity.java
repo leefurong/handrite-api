@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import my.handrite.content.HandriteIntent;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,12 +24,6 @@ public class HandriteIntentDemoActivity extends Activity {
 	private final static String[] HANDRITE_PACKAGE_NAMES = new String[] {
 			"my.handrite.prem", "my.handrite" };
 	private static final String ACTION_FOR_START_HANDRITE = android.content.Intent.ACTION_EDIT;
-	private static final String EXTRA_TEXT = Intent.EXTRA_TEXT;
-	private static final String EXTRA_STREAM = Intent.EXTRA_STREAM;
-	private static final String EXTRA_LABELS = "my.handrite.extra.LABELS";
-	private static final String EXTRA_EXPORT = "my.handrite.extra.EXPORT";
-	private static final String EXTRA_EXPORT_WIDTH = "my.handrite.extra.EXPORT_WIDTH";
-	private static final String EXTRA_DELETE = "my.handrite.extra.DELETE";
 
 	private static final Uri DEFAULT_NOTE_URI = Uri
 			.fromFile(new File(Environment.getExternalStorageDirectory(),
@@ -95,18 +90,19 @@ public class HandriteIntentDemoActivity extends Activity {
 	private void setExtras(Intent intent) {
 		if (checkBoxAppendText.isChecked()) {
 			CharSequence text = textViewAppendText.getText();
-			intent.putExtra(EXTRA_TEXT, text);
+			intent.putExtra(HandriteIntent.EXTRA_TEXT, text);
 		}
 		if (checkBoxAppendImage.isChecked()) {
 			Uri imageUri = Uri.parse(textViewAppendImageUri.getText()
 					.toString());
-			intent.putExtra(EXTRA_STREAM, imageUri);
+			intent.putExtra(HandriteIntent.EXTRA_STREAM, imageUri);
 		}
 		if (checkBoxSetLabel.isChecked()) {
-			intent.putExtra(EXTRA_LABELS, textViewLabel.getText().toString());
+			intent.putExtra(HandriteIntent.EXTRA_LABELS, textViewLabel
+					.getText().toString());
 		}
-		intent.putExtra(EXTRA_EXPORT, EXPORT_URI);
-		intent.putExtra(EXTRA_EXPORT_WIDTH, TEST_WIDTH);
+		intent.putExtra(HandriteIntent.EXTRA_EXPORT, EXPORT_URI);
+		intent.putExtra(HandriteIntent.EXTRA_EXPORT_WIDTH, TEST_WIDTH);
 	}
 
 	private void promptInstallHandrite() {
@@ -132,7 +128,7 @@ public class HandriteIntentDemoActivity extends Activity {
 		if (requestCode == REQUEST_CODE_START_HANDRITE
 				&& resultCode == RESULT_OK) {
 			noteUri = data.getData();
-			if (data.getBooleanExtra(EXTRA_DELETE, false)) {
+			if (data.getBooleanExtra(HandriteIntent.EXTRA_DELETE, false)) {
 				try {
 					new File(new URI(noteUri.toString())).delete();
 					Toast.makeText(this, "note deleted", Toast.LENGTH_SHORT)
@@ -142,9 +138,11 @@ public class HandriteIntentDemoActivity extends Activity {
 				}
 			} else {
 				noteImage.setImageURI((Uri) data
-						.getParcelableExtra(EXTRA_EXPORT));
-				textViewLabel.setText(data.getStringExtra(EXTRA_LABELS));
-				textViewAppendText.setText(data.getStringExtra(EXTRA_TEXT));
+						.getParcelableExtra(HandriteIntent.EXTRA_EXPORT));
+				textViewLabel.setText(data
+						.getStringExtra(HandriteIntent.EXTRA_LABELS));
+				textViewAppendText.setText(data
+						.getStringExtra(HandriteIntent.EXTRA_TEXT));
 			}
 
 		}
