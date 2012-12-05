@@ -129,6 +129,7 @@ public class HandriteIntentDemoActivity extends Activity {
 				&& resultCode == RESULT_OK) {
 			noteUri = data.getData();
 			if (data.getBooleanExtra(HandriteIntent.EXTRA_DELETE, false)) {
+				noteImage.setImageDrawable(null);
 				try {
 					new File(new URI(noteUri.toString())).delete();
 					Toast.makeText(this, "note deleted", Toast.LENGTH_SHORT)
@@ -137,6 +138,7 @@ public class HandriteIntentDemoActivity extends Activity {
 					e.printStackTrace();
 				}
 			} else {
+				noteImage.setImageDrawable(null);
 				noteImage.setImageURI((Uri) data
 						.getParcelableExtra(HandriteIntent.EXTRA_EXPORT));
 				textViewLabel.setText(data
