@@ -28,8 +28,9 @@ public class HandriteIntentDemoActivity extends Activity {
 	private static final Uri DEFAULT_NOTE_URI = Uri
 			.fromFile(new File(Environment.getExternalStorageDirectory(),
 					"handrite_api_demo.note"));
-	private static final Uri EXPORT_URI = Uri.fromFile(new File(Environment
-			.getExternalStorageDirectory(), "handrite_api_demo.png"));
+	private static final File EXPORT_FILE = new File(
+			Environment.getExternalStorageDirectory(), "handrite_api_demo.png");
+	private static final Uri EXPORT_URI = Uri.fromFile(EXPORT_FILE);
 	private static final int REQUEST_CODE_START_HANDRITE = 0;
 	private static final int TEST_WIDTH = 600;
 
@@ -131,9 +132,11 @@ public class HandriteIntentDemoActivity extends Activity {
 			if (data.getBooleanExtra(HandriteIntent.EXTRA_DELETE, false)) {
 				noteImage.setImageDrawable(null);
 				try {
-					new File(new URI(noteUri.toString())).delete();
-					Toast.makeText(this, "note deleted", Toast.LENGTH_SHORT)
-							.show();
+					File noteFile = new File(new URI(noteUri.toString()));
+					Boolean deleted = noteFile.delete();
+					EXPORT_FILE.delete();
+					Toast.makeText(this, deleted ? "deleted" : "delete failed",
+							Toast.LENGTH_SHORT).show();
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
 				}
