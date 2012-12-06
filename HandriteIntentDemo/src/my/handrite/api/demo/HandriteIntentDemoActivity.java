@@ -144,7 +144,7 @@ public class HandriteIntentDemoActivity extends Activity {
 				textViewLabel.setText(data
 						.getStringExtra(HandriteIntent.EXTRA_LABELS));
 				textViewAppendText.setText(data
-						.getStringExtra(HandriteIntent.EXTRA_TEXT));
+						.getCharSequenceExtra(HandriteIntent.EXTRA_TEXT));
 			}
 
 		}
