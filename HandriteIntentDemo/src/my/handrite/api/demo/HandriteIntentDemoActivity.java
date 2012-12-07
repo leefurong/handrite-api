@@ -4,7 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import my.handrite.content.HandriteIntent;
+import my.handrite.api.HandriteIntent;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
