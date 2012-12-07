@@ -1,2 +1,10 @@
 Handrite is an easy to use handwriting note-taking app for Android.
-This repo contains source code you need to integrate with Handrite.
+
+1. Try Handrite: https://play.google.com/store/apps/details?id=my.handrite
+
+2. If you don't need to edit the handwriting after it's written: You can integrate Handrite via ACTION_GET_CONTENT. You probably don't need this repo.
+
+3. If you need to edit the handwriting after it's created: You can integrate via ACTION_EDIT. This repo contains the source code demonstrating how.
+   And here is the documents: https://docs.google.com/document/d/1kWdtQcmhj4NNEX0Pwr3QA65wrmzFh2RMeaJagiE0EN8/edit
+
+4. Please contact me if you have any question: leefurong AT gmail DOT com
