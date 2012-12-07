@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import my.handrite.api.HandriteIntent;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -84,7 +85,11 @@ public class HandriteIntentDemoActivity extends Activity {
 			Intent intent = new Intent(ACTION_FOR_START_HANDRITE)
 					.setDataAndType(noteUri, "").setPackage(packageName);
 			setExtras(intent);
-			startActivityForResult(intent, REQUEST_CODE_START_HANDRITE);
+			try {
+				startActivityForResult(intent, REQUEST_CODE_START_HANDRITE);
+			} catch (ActivityNotFoundException e) {
+				promptLowVersion();
+			}
 		}
 	}
 
@@ -109,6 +114,12 @@ public class HandriteIntentDemoActivity extends Activity {
 	private void promptInstallHandrite() {
 		Toast.makeText(this,
 				"Please install Handrite for handwriting note taking",
+				Toast.LENGTH_LONG).show();
+	}
+
+	private void promptLowVersion() {
+		Toast.makeText(this,
+				"Your Handrite is old, please update it to 1.81+.",
 				Toast.LENGTH_LONG).show();
 	}
 
