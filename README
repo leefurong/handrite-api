@@ -1,3 +1,2 @@
-This is a demo project for developers who want to integrate with Handrite via ACTION_EDIT.
-Here is the detailed document on how to integrate Handrite via ACTION_EDIT:
-https://docs.google.com/document/d/1kWdtQcmhj4NNEX0Pwr3QA65wrmzFh2RMeaJagiE0EN8/edit
+Handrite is an easy to use handwriting note-taking app for Android.
+This repo contains source code you need to integrate with Handrite.
