@@ -7,16 +7,21 @@ import java.net.URISyntaxException;
 import my.handrite.api.HandriteIntent;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +38,7 @@ public class HandriteIntentDemoActivity extends Activity {
 			Environment.getExternalStorageDirectory(), "handrite_api_demo.png");
 	private static final Uri EXPORT_URI = Uri.fromFile(EXPORT_FILE);
 	private static final int REQUEST_CODE_START_HANDRITE = 0;
+	private static final int REQUEST_CODE_SELECT_LOCAL_PICTURE = 1;
 	private static final int TEST_WIDTH = 600;
 
 	private CheckBox checkBoxAppendText;
@@ -75,6 +81,45 @@ public class HandriteIntentDemoActivity extends Activity {
 				startHandrite();
 			}
 		});
+		checkBoxAppendImage
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						if (isChecked && !isValidLocalImageUriForAppend()) {
+							selectLocalImage();
+						}
+					}
+				});
+		textViewAppendImageUri.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				selectLocalImage();
+				checkBoxAppendImage.setChecked(true);
+			}
+		});
+	}
+
+	protected boolean isValidLocalImageUriForAppend() {
+		File file = null;
+		try {
+			CharSequence cs = textViewAppendImageUri.getText();
+			if (cs != null) {
+				String s = cs.toString();
+				file = imageUriToFile(this, Uri.parse(s));
+			}
+		} catch (URISyntaxException e) {
+			file = null;
+		}
+		return file != null && file.exists();
+	}
+
+	protected void selectLocalImage() {
+		Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+		i.setType("image/png");
+		startActivityForResult(i, REQUEST_CODE_SELECT_LOCAL_PICTURE);
 	}
 
 	private void startHandrite() {
@@ -137,31 +182,67 @@ public class HandriteIntentDemoActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_CODE_START_HANDRITE
-				&& resultCode == RESULT_OK) {
-			noteUri = data.getData();
-			if (data.getBooleanExtra(HandriteIntent.EXTRA_DELETE, false)) {
-				noteImage.setImageDrawable(null);
-				try {
-					File noteFile = new File(new URI(noteUri.toString()));
-					Boolean deleted = noteFile.delete();
-					EXPORT_FILE.delete();
-					Toast.makeText(this, deleted ? "deleted" : "delete failed",
-							Toast.LENGTH_SHORT).show();
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
+		switch (requestCode) {
+		case REQUEST_CODE_START_HANDRITE:
+			if (resultCode == RESULT_OK) {
+				noteUri = data.getData();
+				if (data.getBooleanExtra(HandriteIntent.EXTRA_DELETE, false)) {
+					noteImage.setImageDrawable(null);
+					try {
+						File noteFile = new File(new URI(noteUri.toString()));
+						Boolean deleted = noteFile.delete();
+						EXPORT_FILE.delete();
+						Toast.makeText(this,
+								deleted ? "deleted" : "delete failed",
+								Toast.LENGTH_SHORT).show();
+					} catch (URISyntaxException e) {
+						e.printStackTrace();
+					}
+				} else {
+					noteImage.setImageDrawable(null);
+					noteImage.setImageURI((Uri) data
+							.getParcelableExtra(HandriteIntent.EXTRA_EXPORT));
+					textViewLabel.setText(data
+							.getStringExtra(HandriteIntent.EXTRA_LABELS));
+					textViewAppendText.setText(data
+							.getCharSequenceExtra(HandriteIntent.EXTRA_TEXT));
 				}
-			} else {
-				noteImage.setImageDrawable(null);
-				noteImage.setImageURI((Uri) data
-						.getParcelableExtra(HandriteIntent.EXTRA_EXPORT));
-				textViewLabel.setText(data
-						.getStringExtra(HandriteIntent.EXTRA_LABELS));
-				textViewAppendText.setText(data
-						.getCharSequenceExtra(HandriteIntent.EXTRA_TEXT));
 			}
-
+			break;
+		case REQUEST_CODE_SELECT_LOCAL_PICTURE:
+			if (resultCode == RESULT_OK) {
+				textViewAppendImageUri.setText(data.getDataString());
+			}
+			if (!isValidLocalImageUriForAppend()) {
+				checkBoxAppendImage.setChecked(false);
+			}
+			break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	private static File imageUriToFile(Context context, Uri uri)
+			throws URISyntaxException {
+		String scheme = uri.getScheme();
+		if (scheme != null && scheme.equalsIgnoreCase("file")) {
+			return new File(new URI(uri.toString()));
+		} else if (scheme != null && scheme.equalsIgnoreCase("content")) {
+			String[] filePathColumn = { MediaStore.Images.Media.DATA };
+
+			Cursor cursor = context.getContentResolver().query(uri,
+					filePathColumn, null, null, null);
+			if (cursor != null && cursor.moveToFirst()) {
+				int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+				String filePath = cursor.getString(columnIndex);
+				cursor.close();
+				if (filePath != null) {
+					return new File(filePath);
+				}
+			}
+			return null;
+		} else {
+			throw new URISyntaxException(uri.toString(),
+					"only support file:// and content://");
+		}
 	}
 }
